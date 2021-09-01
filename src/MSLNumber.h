@@ -30,39 +30,47 @@ public:
     Number(const char *s);
     Number(std::string s);
     Number();
+    ~Number();
 
     // GETTER / SETTER
-    bool            hasFlag(Number::InfoFlags flags) const;
-    bool            hasNullDecimal() const;
-    bool            hasNullInteger() const;
-    char            *getInteger() const;
-    char            *getDecimal() const;
-    bool            isPositive() const;
-    bool            isDecimal() const;
+    void            setValue(const char *s);                            // Call init if constructor wasn't called
+    bool            hasFlag(Number::InfoFlags flags) const;             // Checks for flags
+    bool            isNull() const;                                     // Checks if number is equal to 0
+    bool            hasNullDecimal() const;                             // Checks if decimal is equal to 0
+    bool            hasNullInteger() const;                             // Checks if integer is equal to 0
+    char            *getInteger() const;                                // Gives a pointer to integer
+    char            *getDecimal() const;                                // Gives a pointer to decimal
+    bool            isPositive() const;                                 // Checks if number is positive
+    bool            isDecimal() const;                                  // Checks if number is a decimal number
 
     // ACTION
-    void            opposite();
+    void            opposite();                                         // Set number to it's opposite (1 opposite of -1)
+    void            abs();                                              // Set number to it's absolute value
 
-    void            printInfo();
+    void            printInfo();                                        // Prints number's info verbose
+    void            print();                                            // Prints number
 
     // OPERATOR
     bool            operator>(const Number& n);
+    bool            operator>=(const Number& n);
     bool            operator<(const Number& n);
+    bool            operator<=(const Number& n);
     bool            operator==(const Number& n);
 
     // STATIC
-    static bool     compareSign(const Number& a, const Number& b);
-    static int      compareDecimal(const Number& a, const Number& b);
+    static bool     compareSign(const Number& a, const Number& b);      // Compares two numbers by sign
+    static int      compareDecimal(const Number& a, const Number& b);   // Compares decimal of two numbers
 
 private:
 
     void            init(const char *str);
-    bool            is_valid(const char *str) const;   // Check if char * passed is valid must be -.0123456789
-    void            check_info(const char *str);       // Check for info flags
-    void            parse_integer_part(const char *str);
-    void            parse_decimal_part(const char *str);
-    void            reformat();
-    bool            is_number_null(char *str) const;
+    void            clear();
+    bool            isValidStr(const char *str) const;                  // Checks if str is valid must be -.0123456789
+    void            checkInfo(const char *str);                         // Checks and fill info_flags
+    void            parseIntegerPart(const char *str);
+    void            parseDecimalPart(const char *str);
+    void            reformat();                                         // Removes useless char
+    bool            isNumberNull(char *str) const;
 
     void            addInfoFlag(Number::InfoFlags flags);
     void            removeInfoFlag(Number::InfoFlags flags);

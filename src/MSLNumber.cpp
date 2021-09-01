@@ -2,6 +2,10 @@
 
 namespace MSL {
 
+Number::Number() {
+    init(NULL);
+}
+
 Number::Number(const char *s)
 {
     init(s);
@@ -10,6 +14,11 @@ Number::Number(const char *s)
 Number::Number(std::string s)
 {
     init(s.c_str());
+}
+
+Number::~Number()
+{
+
 }
 
 // PRIVATE ----------------------
@@ -21,16 +30,22 @@ void Number::init(const char *str)
     info_flag = static_cast<int>(Number::InfoFlags::NONE);
     number_set = static_cast<int>(Number::NumberSet::NONE);
 
-    if (is_valid(str))
+    if (isValidStr(str))
     {
         validity = true;
-        check_info(str);
-        parse_integer_part(str);
+        checkInfo(str);
+        parseIntegerPart(str);
         if (hasFlag(Number::InfoFlags::DECIMAL))
-            parse_decimal_part(str);
+            parseDecimalPart(str);
         reformat();
 
     } else validity = false;
+}
+
+void Number::clear()
+{
+    if (integer) delete integer;
+    if (decimal) delete decimal;
 }
 
 void Number::addInfoFlag(Number::InfoFlags flags)
@@ -44,12 +59,14 @@ void Number::removeInfoFlag(Number::InfoFlags flags)
         info_flag -= static_cast<int>(flags);
 }
 
-bool Number::is_valid(const char *str) const
+bool Number::isValidStr(const char *str) const
 {
     int i = 0;
     int negative_char = 0;
     int dot_char = 0;
 
+    if (!str)
+        return false;
     while (str[i])
     {
         if (!str_contains("-.0123456789", str[i]))
@@ -65,7 +82,7 @@ bool Number::is_valid(const char *str) const
     return true;
 }
 
-void Number::check_info(const char *str)
+void Number::checkInfo(const char *str)
 {
     int i = 0;
 
@@ -79,7 +96,7 @@ void Number::check_info(const char *str)
     }
 }
 
-void Number::parse_integer_part(const char *str)
+void Number::parseIntegerPart(const char *str)
 {
     int len = 0;
     int i = 0;
@@ -111,7 +128,7 @@ void Number::parse_integer_part(const char *str)
     }
 }
 
-void Number::parse_decimal_part(const char *str)
+void Number::parseDecimalPart(const char *str)
 {
     int len = 0;
     int i = 0;
@@ -120,7 +137,7 @@ void Number::parse_decimal_part(const char *str)
 
     while (str[i] != '.')
         i++;
-    if (!str[i+1]) // If 
+    if (!str[i + 1])
     {
         decimal = new char[2];
         memset(decimal, 0, 2);
@@ -174,7 +191,7 @@ void Number::reformat()
             i++;
         }
     }
-    delete(integer);
+    delete integer;
     integer = tmp;
 
     // Decimal removing zero
@@ -201,12 +218,12 @@ void Number::reformat()
                 i++;
             }
         }
-        delete(decimal);
+        delete decimal;
         decimal = tmp;
     }
 }
 
-bool Number::is_number_null(char *str) const
+bool Number::isNumberNull(char *str) const
 {
     int i = 0;
 
@@ -226,6 +243,7 @@ bool Number::is_number_null(char *str) const
 bool Number::operator>(const Number& n)
 {
     char *nInteger;
+    char *nDecimal;
     int lenA;
     int lenB;
     int i;
@@ -258,15 +276,84 @@ bool Number::operator>(const Number& n)
         }
         // lenA == lenB
         cmpRes = strcmp(integer, nInteger);
+        if (cmpRes > 0)
+        {
+            if (isPositive())
+                return true;
+            return false;
+        }
+        else if (cmpRes < 0)
+        {
+            if (isPositive())
+                return false;
+            return true;
+        }
+        else
+        {
+            // Check decimal difference
+            if (hasNullDecimal() && n.hasNullDecimal())
+                return false;
+            else if (hasNullDecimal())
+            {
+                if (isPositive())
+                    return false;
+                return true;
+            }
+            else if (n.hasNullDecimal())
+            {
+                if (isPositive())
+                    return true;
+                return false;
+            }
+            nDecimal = n.getDecimal();
+            cmpRes = strcmp(decimal, nDecimal);
+            if (cmpRes > 0)
+            {
+                if (isPositive())
+                    return true;
+                return false;
+            }
+            else if (cmpRes < 0)
+            {
+                if (isPositive())
+                    return false;
+                return true;
+            }
+            else
+                return false;
+        }
     }
+}
+
+bool Number::operator>=(const Number& n)
+{
+    if ((*this > n) || (*this == n))
+        return true;
+    return false;
 }
 
 bool Number::operator<(const Number& n)
 {
+    bool res;
+
     if (isPositive() && !n.isPositive())
         return false;
     else if (!isPositive() && n.isPositive())
         return true;
+    if (*this == n)
+        return false;
+    res = (*this > n);
+    if (res)
+        return false;
+    return true;
+
+}
+
+bool Number::operator<=(const Number& n)
+{
+    if ((*this < n) || (*this == n))
+        return true;
+    return false;
 }
 
 bool Number::operator==(const Number& n)
@@ -277,10 +364,8 @@ bool Number::operator==(const Number& n)
 
     if (Number::compareSign(*this, n))
     {
-        //std::cout << "Same sign" << std::endl;
         nInteger = n.getInteger();
         cmpRes = strcmp(integer, nInteger);
-        //std::cout << "integer cmp : " << cmpRes << std::endl;
         if (!cmpRes)
         {
             nDecimal = n.getDecimal();
@@ -293,6 +378,12 @@ bool Number::operator==(const Number& n)
             return false;
     }
     return false;
+}
+
+void Number::setValue(const char *s)
+{
+    // DO CLEAR FIRST -- CODE8 --
+    init(s);
 }
 
 char *Number::getInteger() const
@@ -324,14 +415,19 @@ bool Number::hasFlag(Number::InfoFlags flags) const
     return info_flag & static_cast<int>(flags);
 }
 
+bool Number::isNull() const
+{
+    return hasNullInteger() && hasNullDecimal();
+}
+
 bool Number::hasNullInteger() const
 {
-    return is_number_null(integer);
+    return isNumberNull(integer);
 }
 
 bool Number::hasNullDecimal() const
 {
-    return is_number_null(decimal);
+    return isNumberNull(decimal);
 }
 
 void Number::printInfo()
@@ -355,11 +451,26 @@ void Number::printInfo()
     std::cout << "-----     END     -----" << std::endl;
 }
 
+void Number::print()
+{
+    if (!isPositive())
+        std::cout << "-";
+    std::cout << integer;
+    if (isDecimal())
+        std::cout << "." << decimal << std::endl;
+}
+
 void Number::opposite()
 {
     if (isPositive())
         addInfoFlag(Number::InfoFlags::NEGATIVE);
     else
+        removeInfoFlag(Number::InfoFlags::NEGATIVE);
+}
+
+void Number::abs()
+{
+    if (!isPositive())
         removeInfoFlag(Number::InfoFlags::NEGATIVE);
 }
 
@@ -377,20 +488,11 @@ int Number::compareDecimal(const Number& a, const Number& b)
     int i = 0;
 
     if (a.hasNullDecimal() && b.hasNullDecimal())
-    {
-        std::cout << "A" << std::endl;
         return 0;
-    }
     else if (a.hasNullDecimal() && !b.hasNullDecimal())
-    {
-        std::cout << "B" << std::endl;
         return -1;
-    }
     else if (!a.hasNullDecimal() && b.hasNullDecimal())
-    {
-        std::cout << "C" << std::endl;
         return 1;
-    }
     return strcmp(aDecimal, bDecimal);
 }
 

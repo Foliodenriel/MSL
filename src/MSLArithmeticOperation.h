@@ -22,14 +22,32 @@ class ArithmeticOperation {
 
         ArithmeticOperation();
 
-        Number           add(Number operandA, Number operandB);
-        Number           substract(Number operandA, Number operandB);
+        // ACTION
+        Number              add(Number addendA, Number addendB);
+        Number              substract(Number addendA, Number addendB);
+        Number              multiplicate(Number numberA, Number numberB);
         
 
 
     private:
 
-        Number           result;
+        int                 getIntFromChar(char c);
+        char                getCharFromInt(int n);
+
+        // + | -
+        char                *addProcedure(Number addendA, Number addendB);
+        char                *subProcedure(Number a, Number b);
+        char                *subProcedureDecimalHelper(char *decA, char *decB, int *ec, int cmp_res);
+        char                *subProcedureAction(char *a, char *b, int extra_carry = 0);
+
+        bool                isAbsSuperior(Number a, Number b);
+        char                *allocateSupUnit(char *s); // Allocate a new *10 number that is one unit superior to given string, ex: 6672 => 10000
+        void                fillChar(char **stra, char **strb, bool fillBefore);
+
+        Number              result;
 };
+
+Number                      operator+(Number& a, Number& b);
+Number                      operator-(Number& a, Number& b);
 
 };

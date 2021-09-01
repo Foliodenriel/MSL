@@ -2,12 +2,18 @@
 
 int main(int argc, char **argv)
 {
-    MSL::Number na = MSL::Number("5.00006");
-    MSL::Number nb = MSL::Number("5.00006");
+    MSL::Number a = MSL::Number("1");
+    MSL::Number b = MSL::Number("2");
+    MSL::Number c = MSL::Number("3");
+    MSL::Number d = MSL::Number("4");
+    MSL::Number res;
+    
+    MSL::ArithmeticOperation ao;
 
-    std::cout << "EQUAL : " << (na == nb) << std::endl;
-
-//    std::cout << (na > nb) << std::endl;
+    res = a + b;
+    res = res + c;
+    res = res + d;
+    res.print();
 
     return 0;
 }
