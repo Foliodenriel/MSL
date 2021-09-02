@@ -41,7 +41,7 @@ Number ArithmeticOperation::add(Number addendA, Number addendB)
     }
     ret.setValue(new_number);
     // Check if negative and NULL to change sign
-    if (isNegative)
+    if (isNegative && !ret.isNull())
         ret.opposite();
     return ret;
 }
@@ -87,11 +87,27 @@ Number ArithmeticOperation::substract(Number numberA, Number numberB)
 
 Number ArithmeticOperation::multiplicate(Number numberA, Number numberB)
 {
+    Number ret;
+    char *new_number = NULL;
+    char *tmp = NULL;
+    size_t len;
     bool isNegative = false;
 
+    // Classic handmade multiplication (cF. picture in folder)
+    len = 0;
     if ((numberA.isPositive() && !numberB.isPositive()) || (!numberA.isPositive() && numberB.isPositive()))
         isNegative = true;
-    // Classic handmade multiplication (cF. picture in folder)
+    new_number = multProcedure(strjoin(numberA.getInteger(), numberA.getDecimal()), strjoin(numberB.getInteger(), numberB.getDecimal()));
+    if (numberA.getDecimal())
+        len += strlen(numberA.getDecimal());
+    if (numberB.getDecimal())
+        len += strlen(numberB.getDecimal());
+    tmp = new_number;
+    new_number = placeDecimal(tmp, len);
+    ret.setValue(new_number);
+    if (isNegative)
+        ret.opposite();
+    return ret;
 }
 
 // PRIVATE
@@ -267,6 +283,54 @@ char *ArithmeticOperation::subProcedureAction(char *a, char *b, int extra_carry)
     return ret;
 }
 
+char *ArithmeticOperation::multProcedure(char *a, char *b)
+{
+    // 1.46  |  2
+    Number res;
+    Number addend;
+    char *line;
+    int x, y;
+    int i;
+    int m;
+    int aLen;
+    int ec;
+
+    y = 0;
+    line = NULL;
+    aLen = strlen(a);
+    reverseStr(a);
+    reverseStr(b);
+    while (b[y])
+    {
+        i = 0;
+        x = 0;
+        ec = 0;
+        if (line)
+            delete line;
+        line = new char[aLen + y + 2];
+        memset(line, 0, aLen + y + 2);
+        // Adding begining 0
+        while (i < y)
+        {
+            line[i] = '0';
+            i++;
+        }
+        while (a[x])
+        {
+            m = (getIntFromChar(a[x]) * getIntFromChar(b[y])) + ec;
+            line[x + i] = getCharFromInt(m % 10);
+            ec = m / 10;
+            x++;
+        }
+        line[x + i] = getCharFromInt(ec);
+        reverseStr(line);
+        addend.setValue(line);
+        res = res + addend;
+        y++;
+    }
+    return res.getInteger();
+}
+
 // Fill char for them to have same size
 void ArithmeticOperation::fillChar(char **stra, char **strb, bool fillBefore)
 {
@@ -303,6 +367,49 @@ void ArithmeticOperation::fillChar(char **stra, char **strb, bool fillBefore)
     }
 }
 
+void ArithmeticOperation::reverseStr(char *str)
+{
+    char tmp;
+    size_t len;
+    int i;
+
+    i = 0;
+    len = strlen(str) - 1;
+    while (str[i] && (i < len))
+    {
+        tmp = str[i];
+        str[i] = str[len];
+        str[len] = tmp;
+        len--;
+        i++;
+    }
+}
+
+char *ArithmeticOperation::placeDecimal(char *src, int nb_decimal)
+{
+    char *ret;
+    size_t len;
+
+    ret = NULL;
+    len = strlen(src);
+    if (nb_decimal > len)
+    {
+        ret = new char[nb_decimal + 3];
+        memset(ret, '0', nb_decimal + 3);
+        ret[1] = '.';
+        ret[nb_decimal + 2] = '\0';
+        strcpy(&ret[nb_decimal + 2 - len], src);
+        return ret;
+    }
+    ret = strjoin(".", &src[len - nb_decimal]);
+    src[len - nb_decimal] = '\0';
+    if (len == nb_decimal)
+        ret = strjoin("0", ret);
+    else
+        ret = strjoin(src, ret);
+    return ret;
+}
+
 // STATIC
 
 Number operator+(Number& a, Number& b)
@@ -315,6 +422,42 @@ Number operator-(Number& a, Number& b)
 {
     ArithmeticOperation ao;
     return ao.substract(a, b);
+}
+
+Number operator*(Number& a, Number& b)
+{
+    ArithmeticOperation ao;
+    return ao.multiplicate(a, b);
+}
+
+char *strjoin(const char *a, const char *b)
+{
+    char *ret = NULL;
+    size_t len;
+
+    if (a && b)
+    {
+        len = strlen(a) + strlen(b) + 1;
+        ret = new char[len];
+        memset(ret, 0, len);
+        strcpy(ret, a);
+        strcpy(&ret[strlen(a)], b);
+    }
+    else if (a && !b)
+    {
+        len = strlen(a) + 1;
+        ret = new char[len];
+        memset(ret, 0, len);
+        strcpy(ret, a);
+    }
+    else if (!a && b)
+    {
+        len = strlen(b) + 1;
+        ret = new char[len];
+        memset(ret, 0, len);
+        strcpy(ret, b);
+    }
+    return ret;
 }
 
 };

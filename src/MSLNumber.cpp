@@ -32,14 +32,17 @@ void Number::init(const char *str)
 
     if (isValidStr(str))
     {
-        validity = true;
         checkInfo(str);
         parseIntegerPart(str);
         if (hasFlag(Number::InfoFlags::DECIMAL))
             parseDecimalPart(str);
         reformat();
 
-    } else validity = false;
+    }
+    else
+    {
+        parseIntegerPart("0");
+    }
 }
 
 void Number::clear()
@@ -383,6 +386,7 @@ bool Number::operator==(const Number& n)
 void Number::setValue(const char *s)
 {
     // DO CLEAR FIRST -- CODE8 --
+    clear();
     init(s);
 }
 

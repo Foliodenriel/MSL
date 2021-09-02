@@ -1,0 +1,8 @@
+PRIORITY LIST:
+
+[ HIGH ]    - Delete unreferenced pointers to avoid LEAKS
+[ LOW ]     - Implement helping function formating printed result (decimal, etc)
+[ LOW ]     - Handle UNKNOWN number for later routing to resolve by itself
+[ LOW ]     - Calculation branch system "((A + B) + C) * D"
+[ DONE ]    - nb_decimal > len of new_number for multiplication error to fix
+[ DONE ]    - Addition and Substraction check for "-0" result and set it to "0"

@@ -79,7 +79,7 @@ private:
     char            *decimal;
     int             number_set;
     int             info_flag;
-    bool            validity;
+    bool            validity;                                           // DEPRECATED
 };
 
 bool                str_contains(const char *str, char c);
