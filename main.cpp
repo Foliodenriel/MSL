@@ -8,7 +8,7 @@ int main(int argc, char **argv)
     
     MSL::ArithmeticOperation ao;
 
-    res = a * b;
+    res = a + b;
     res.print();
 
     return 0;

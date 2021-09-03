@@ -43,6 +43,8 @@ Number ArithmeticOperation::add(Number addendA, Number addendB)
     // Check if negative and NULL to change sign
     if (isNegative && !ret.isNull())
         ret.opposite();
+    if (new_number)
+        delete new_number;
     return ret;
 }
 
@@ -82,6 +84,8 @@ Number ArithmeticOperation::substract(Number numberA, Number numberB)
     ret.setValue(new_number);
     if (isNegative)
         ret.opposite();
+    if (new_number)
+        delete new_number;
     return ret;
 }
 
@@ -107,6 +111,8 @@ Number ArithmeticOperation::multiplicate(Number numberA, Number numberB)
     ret.setValue(new_number);
     if (isNegative)
         ret.opposite();
+    if (new_number)
+        delete new_number;
     return ret;
 }
 
@@ -200,6 +206,10 @@ char *ArithmeticOperation::addProcedure(Number addendA, Number addendB)
     strcpy(tmp, new_integer);
     if (new_decimal)
         strcat(strcat(tmp, "."), new_decimal);
+    if (new_integer)
+        delete new_integer;
+    if (new_decimal)
+        delete new_decimal;
     return tmp;
 }
 
@@ -228,6 +238,8 @@ char *ArithmeticOperation::subProcedure(Number a, Number b)
     strcpy(tmp, new_integer);
     if (new_decimal)
         strcat(strcat(tmp, "."), new_decimal);
+    delete new_integer;
+    delete new_decimal;
     return tmp;
 }
 
@@ -328,6 +340,8 @@ char *ArithmeticOperation::multProcedure(char *a, char *b)
         res = res + addend;
         y++;
     }
+    if (line)
+        delete line;
     return res.getInteger();
 }
 

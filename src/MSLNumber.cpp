@@ -37,12 +37,9 @@ void Number::init(const char *str)
         if (hasFlag(Number::InfoFlags::DECIMAL))
             parseDecimalPart(str);
         reformat();
-
     }
     else
-    {
         parseIntegerPart("0");
-    }
 }
 
 void Number::clear()
