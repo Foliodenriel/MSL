@@ -2,6 +2,8 @@
 
 namespace MSL {
 
+size_t Number::sPrecision = 4;
+
 Number::Number() {
     init(NULL);
 }
@@ -13,6 +15,14 @@ Number::Number(const char *s)
 
 Number::Number(std::string s)
 {
+    init(s.c_str());
+}
+
+Number::Number(int n)
+{
+    std::string s;
+
+    s = std::to_string(n);
     init(s.c_str());
 }
 
@@ -146,7 +156,8 @@ void Number::parseDecimalPart(const char *str)
     }
     i++;
     i_tmp = i;
-    while (str[i])
+    i = 0;
+    while (str[i_tmp + i] && i < Number::sPrecision)
     {
         i++;
         len++;
@@ -155,10 +166,10 @@ void Number::parseDecimalPart(const char *str)
     decimal = new char[len + 1];
     memset(decimal, 0, len + 1);
 
-    i = i_tmp;
-    while (str[i])
+    i = 0;
+    while (str[i_tmp + i] && i < Number::sPrecision)
     {
-        decimal[j] = str[i];
+        decimal[j] = str[i_tmp + i];
         i++;
         j++;
     }
@@ -351,7 +362,7 @@ bool Number::operator<(const Number& n)
 
 bool Number::operator<=(const Number& n)
 {
-    if ((*this < n) || (*this == n))
+    if (*this < n || (*this == n))
         return true;
     return false;
 }
@@ -406,7 +417,7 @@ bool Number::isPositive() const
 
 bool Number::isDecimal() const
 {
-    if (hasFlag(Number::InfoFlags::DECIMAL))
+    if (!hasNullDecimal())
         return true;
     return false;
 }
@@ -458,7 +469,8 @@ void Number::print()
         std::cout << "-";
     std::cout << integer;
     if (isDecimal())
-        std::cout << "." << decimal << std::endl;
+        std::cout << "." << decimal;
+    std::cout << std::endl;
 }
 
 void Number::opposite()
@@ -474,6 +486,8 @@ void Number::abs()
     if (!isPositive())
         removeInfoFlag(Number::InfoFlags::NEGATIVE);
 }
+
+// STATIC
 
 bool Number::compareSign(const Number& a, const Number& b)
 {
@@ -495,6 +509,17 @@ int Number::compareDecimal(const Number& a, const Number& b)
     else if (!a.hasNullDecimal() && b.hasNullDecimal())
         return 1;
     return strcmp(aDecimal, bDecimal);
+}
+
+size_t Number::Precision()
+{
+    return Number::sPrecision;
+}
+
+size_t Number::Precision(size_t n)
+{
+    Number::sPrecision = n;
+    return Number::sPrecision;
 }
 
 // FILE

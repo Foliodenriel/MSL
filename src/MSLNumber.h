@@ -2,6 +2,7 @@
 
 # include <iostream>
 # include <cstring>
+# include <string>
 
 namespace MSL {
 
@@ -29,6 +30,7 @@ public:
 
     Number(const char *s);
     Number(std::string s);
+    Number(int n);
     Number();
     ~Number();
 
@@ -60,6 +62,12 @@ public:
     // STATIC
     static bool     compareSign(const Number& a, const Number& b);      // Compares two numbers by sign
     static int      compareDecimal(const Number& a, const Number& b);   // Compares decimal of two numbers
+    static size_t   Precision();
+    static size_t   Precision(size_t n);
+
+protected:
+
+    static size_t   sPrecision;
 
 private:
 
