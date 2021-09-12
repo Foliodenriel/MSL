@@ -121,9 +121,44 @@ Number ArithmeticOperation::multiplicate(Number numberA, Number numberB)
 Number ArithmeticOperation::divide(Number numberA, Number numberB)
 {
     Number ret;
-    char *new_number = NULL;
+    size_t len;
+    char *res;
+    char *integer;
+    char *decimal;
 
-    new_number = divProcedure(numberA, numberB);
+    res = NULL;
+    integer = NULL;
+    decimal = NULL;
+    numberA.abs();
+    numberB.abs();
+    commonIntegeriser(numberA, numberB);
+
+    integer = divProcedureInteger(numberA, numberB);
+    if (!numberA.isNull())
+        decimal = divProcedureDecimal(numberA, numberB);
+
+    if (decimal)
+    {
+        len = strlen(integer) + strlen(decimal);
+        res = new char[len + 2];
+        memset(res, 0, len + 2);
+        strcpy(res, integer);
+        strcpy(&res[strlen(integer)], ".");
+        strcpy(&res[strlen(integer) + 1], decimal);
+    }
+    else
+    {
+        len = strlen(integer);
+        res = new char[len + 1];
+        memset(res, 0, len + 1);
+        strcpy(res, integer);
+    }
+
+    ret = Number(res);
+    if ((numberA.isPositive() && !numberB.isPositive()) || (!numberA.isPositive() && numberB.isPositive()))
+        ret.opposite();
+
+    return ret;
 }
 
 // PRIVATE
@@ -353,39 +388,6 @@ char *ArithmeticOperation::multProcedure(char *a, char *b)
     return res.getInteger();
 }
 
-char *ArithmeticOperation::divProcedure(Number numberA, Number numberB)
-{
-    char *new_integer = NULL;
-    char *new_decimal = NULL;
-
-    commonIntegeriser(numberA, numberB);
-    divProcedureAction(&new_integer, &new_decimal, numberA, numberB);
-}
-
-char *ArithmeticOperation::divProcedureAction(char **integer, char **decimal, Number a, Number b)
-{
-    a.abs();
-    b.abs();
-    //a.print();
-    //b.print();
-    *integer = divProcedureInteger(a, b);
-    //a.print();
-    if (!a.isNull())
-    {
-        a.print();
-        //std::cout << "Decimal" << std::endl;
-        *decimal = divProcedureDecimal(a, b);
-    }
-    //a.print();
-    std::cout << *integer;
-    if (*decimal)
-        std::cout << "." << *decimal;
-    std::cout << std::endl;
-
-    // IF A IS NOT NULL THEN PRECISE THE NUMBER IS NORMAL TYPE
-    //divProcedureClosest(a, b);
-}
-
 char *ArithmeticOperation::divProcedureInteger(Number& a, Number& b)
 {
     Number mult;
@@ -414,7 +416,6 @@ char *ArithmeticOperation::divProcedureInteger(Number& a, Number& b)
     }
     else
     {
-        //subA = Number(getIntFromChar(aCopy[i]));
         while (aCopy[i]) // We increase each time we are going through
         {
             if (i == 0)
@@ -461,74 +462,6 @@ char *ArithmeticOperation::divProcedureInteger(Number& a, Number& b)
     return res;
 }
 
-/*char *ArithmeticOperation::divProcedureInteger(Number& a, Number& b)
-{
-    // REFACTO THIS ALL CODE
-    Number n;
-    Number sRes;
-    Number subA;
-    Number subB;
-    char *aCopy;
-    char *aRemain;
-    char *res;
-    char *tmpRes;
-    int resChar;
-    int len;
-
-    res = NULL;
-    tmpRes = NULL;
-    aRemain = NULL;
-    len = 0;
-    n = Number("10");
-    if (a < b)
-    {
-        res = new char[2];
-        memset(res, 0, 2);
-        res[0] = '0';
-        a = a * n;
-    }
-    else
-    {
-        len = strlen(a.getInteger());
-        aCopy = new char[len + 1];
-        memset(aCopy, 0, len + 1);
-        strcpy(aCopy, a.getInteger());
-        while (aCopy)
-        {
-            subB = b;
-            divProcedurePrepare(&aCopy, &aRemain, b);
-            subA = Number(aRemain);
-            if (!aCopy)
-                break ;
-            else if (subA < subB)
-            {
-                resChar = 0;
-                tmpRes = strcjoin(res, getCharFromInt(resChar));
-                if (res)
-                    delete res;
-                res = tmpRes;
-            }
-            else
-            {
-                resChar = divProcedureClosest(subA, subB);
-                tmpRes = strcjoin(res, getCharFromInt(resChar));
-                if (res)
-                    delete res;
-                res = tmpRes;
-                subA = subA - subB;
-                if (aRemain)
-                    delete aRemain;
-                aRemain = subA.getInteger();
-            }
-            //a.setValue(res);
-            //a.print();
-        }
-        a = subA * n;
-    }
-    //std::cout << "RES : " << res << std::endl;
-    return res;
-}*/
-
 char *ArithmeticOperation::divProcedureDecimal(Number& a, Number& b)
 {
     std::vector<Number> pattern;
@@ -552,7 +485,7 @@ char *ArithmeticOperation::divProcedureDecimal(Number& a, Number& b)
         else
             pattern.push_back(subA);
         subB = b;
-        if (subA >= subB) // Then divclosest in next number
+        if (subA >= subB)   // Then divclosest in next number
         {
             resChar = divProcedureClosest(subA, subB);
             tmpRes = strcjoin(res, getCharFromInt(resChar));
@@ -562,7 +495,7 @@ char *ArithmeticOperation::divProcedureDecimal(Number& a, Number& b)
             subA = subA - subB;
             subA = subA * mult;
         }
-        else            // Then '0' is next number
+        else                // Then '0' is next number
         {
             resChar = 0;
             tmpRes = strcjoin(res, getCharFromInt(resChar));
@@ -573,6 +506,7 @@ char *ArithmeticOperation::divProcedureDecimal(Number& a, Number& b)
         }
         i++;
     }
+    a = subA;
     return res;
 }
 
@@ -584,40 +518,6 @@ bool ArithmeticOperation::divProcedureVectorContains(std::vector<Number> list, N
             return true;
     }
     return false;
-}
-
-void ArithmeticOperation::divProcedurePrepare(char **copy, char **remain, Number& b)
-{
-    Number n;
-    char *tmp;
-    size_t len;
-
-    len = strlen(*copy);
-    if (!len)
-    {
-        *copy = NULL;
-        return ;
-    }
-    //if (*remain) std::cout << "REMAIN : " << *remain << std::endl;
-    //if (*copy) std::cout << "COPY : " << *copy << std::endl;
-    len = strlen(*copy);
-    if (!len)
-        return ;
-    // Adding next char first char from copy to remain
-    tmp = *remain;
-    *remain = strcjoin(*remain, (*copy)[0]);
-    if (tmp)
-        delete tmp;
-
-    // Removing added char from copy
-    tmp = new char[len];
-    memset(tmp, 0, len);
-    strcpy(tmp, &((*copy)[1]));
-    if (*copy)
-        delete *copy;
-    *copy = tmp;
-    //if (*remain) std::cout << "REMAIN2 : " << *remain << std::endl;
-    n.setValue(*remain);
 }
 
 int ArithmeticOperation::divProcedureClosest(Number a, Number& b)

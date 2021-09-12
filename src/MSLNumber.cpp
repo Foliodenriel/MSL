@@ -2,7 +2,7 @@
 
 namespace MSL {
 
-size_t Number::sPrecision = 4;
+size_t Number::sPrecision = 10;
 
 Number::Number() {
     init(NULL);

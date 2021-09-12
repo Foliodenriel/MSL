@@ -41,8 +41,6 @@ class ArithmeticOperation {
         char                *subProcedureDecimalHelper(char *decA, char *decB, int *ec, int cmp_res);
         char                *subProcedureAction(char *a, char *b, int extra_carry = 0);
         char                *multProcedure(char *a, char *b);
-        char                *divProcedure(Number numberA, Number numberB);
-        char                *divProcedureAction(char **integer, char **decimal, Number a, Number b);
         char                *divProcedureInteger(Number& a, Number& b);
         char                *divProcedureDecimal(Number& a, Number& b);
         bool                divProcedureVectorContains(std::vector<Number> list, Number n);              // Check if n is contained in list
